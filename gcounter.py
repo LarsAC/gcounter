@@ -1,7 +1,7 @@
 
 import time
 import pigpio
-# import paho.mqtt.client as mqtt
+import paho.mqtt.client as mqtt
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code " + str(rc))
@@ -37,7 +37,9 @@ class RadCounter:
 		"""
 		Compute activity and return
 		"""
-		return self._maxCount * 60.0 * 1000.0 / self._duration
+		cpm = self._maxCount * 60.0 * 1000.0 / self._duration
+		# translate into an actual actitivity
+		return cpm
 
 	def _cbf(self, gpio, level, tick):
 
@@ -51,13 +53,13 @@ class RadCounter:
 if __name__ == "__main__":
 
 	COUNTER_GPIO = 17 	# which GPIO to use
-	MAX_COUNT = 5 		# measure activity for 250 events
+	MAX_COUNT = 5 		# measure activity for 250 events, use 5 for button testing
 
-	# client = mqtt.Client()
-	# client.on_connect = on_connect
+	client = mqtt.Client()
+	client.on_connect = on_connect
 	
-	# client.connect("localhost", 1883, 60)
-	# client.loop_start()
+	client.connect("localhost", 1883, 60)
+	client.loop_start()
 
 	pi = pigpio.pi()
 
@@ -72,7 +74,7 @@ if __name__ == "__main__":
 		print a
 		
 		# publish
-		# client.publish("WS74/radioactivity", a)
+		client.publish("WS74/radioactivity", a)
 		
 	pi.stop()
 
